@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
    <el-row>
-      <el-button type="primary" plain icon="Plus" v-hasPermi="['web:combo:edit']" @click="handleEdit()">新增</el-button>
+      <el-button type="primary" plain icon="Plus" v-hasPermi="['artfy:combo:edit']" @click="handleEdit()">新增</el-button>
    </el-row>
       
    <el-row style="margin-top: 12px;">
@@ -22,8 +22,8 @@
          <el-table-column label="修改时间" prop="updateTime" width="156" />
          <el-table-column label="操作" align="center" class-name="small-padding fixed-width"  width="160">
             <template #default="scope">
-               <el-button type="text" icon="Edit" @click="handleEdit(scope.row)" v-hasPermi="['web:combo:edit']" >修改</el-button>
-               <el-button type="text" icon="Edit" @click="handleDelete()" v-hasPermi="['web:combo:delete']" >删除</el-button>
+               <el-button type="text" icon="Edit" @click="handleEdit(scope.row)" v-hasPermi="['artfy:combo:edit']" >修改</el-button>
+               <el-button type="text" icon="Edit" @click="handleDelete()" v-hasPermi="['artfy:combo:delete']" >删除</el-button>
             </template>
          </el-table-column>
       </el-table>

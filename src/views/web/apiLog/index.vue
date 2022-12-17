@@ -1,10 +1,10 @@
 <template>
    <div class="app-container">
       <el-form :model="queryParams" ref="queryRef" :inline="true">
-         <el-form-item label="会员id" prop="phonenumber">
+         <el-form-item label="">
             <el-input
-               v-model="queryParams.memberId"
-               placeholder="请输入会员id"
+               v-model="queryParams.params.searchValue"
+               placeholder="请输入会员id、手机号或备注"
                clearable
                style="width: 240px"
                @keyup.enter="handleQuery"
@@ -18,7 +18,9 @@
       <!-- 表格数据 -->
       <el-table v-loading="loading" :data="dataList">
          <!-- <el-table-column type="selection" align="center" /> -->
-         <el-table-column label="会员id" prop="memberId" />
+         <el-table-column label="会员id" prop="member.id" />
+         <el-table-column label="会员手机号" prop="member.phonenumber" />
+         <el-table-column label="会员备注" prop="member.remark" />
          <el-table-column label="产品" prop="product" />
          <el-table-column label="调用时间" prop="requestTime" />
          <el-table-column label="输入对象">
@@ -75,7 +77,9 @@ const total = ref(0);
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
-  memberId: undefined,
+  params: {
+   searchValue: '',
+  }
 });
 
 

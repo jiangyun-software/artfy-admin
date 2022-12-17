@@ -16,7 +16,7 @@
    </el-row>
 
    <el-row>
-      <el-button type="primary" plain icon="Plus" v-hasPermi="['web:product:edit']" @click="handleEdit()">新增</el-button>
+      <el-button type="primary" plain icon="Plus" v-hasPermi="['artfy:product:edit']" @click="handleEdit(undefined)">新增</el-button>
    </el-row>
       
    <el-row style="margin-top: 12px;">
@@ -43,13 +43,13 @@
          </el-table-column>
          <el-table-column label="操作" align="center" class-name="small-padding fixed-width"  width="80">
             <template #default="scope">
-               <el-button type="text" icon="Edit" @click="handleEdit(scope.row)" v-hasPermi="['web:product:edit']" >修改</el-button>
+               <el-button type="text" icon="Edit" @click="handleEdit(scope.row)" v-hasPermi="['artfy:product:edit']" >修改</el-button>
             </template>
          </el-table-column>
       </el-table>
    </el-row>
 
-    <el-dialog :title="editTitle" v-model="editDialogVisible" width="600px" append-to-body :close-on-click-modal="false">
+  <el-dialog :title="editTitle" v-model="editDialogVisible" width="600px" append-to-body :close-on-click-modal="false">
       <el-form ref="editFormRef" :model="apiFormData" :rules="rules" label-width="80px">
          <el-form-item label="产品名称" prop="name">
             <el-input v-model="apiFormData.name" placeholder="请输入产品名称" />
@@ -85,7 +85,7 @@
          <el-button @click="cancel()">取 消</el-button>
          </div>
       </template>
-   </el-dialog>
+  </el-dialog>
   </div>
 </template>
 
@@ -145,6 +145,7 @@ const handleEdit = (row) => {
       apiFormData.remark = row.remark;
       apiFormData.disabled = row.disabled;
       apiFormData.apiType = row.apiType;
+      apiFormData.point = row.point;
    } else {
       editTitle.value = '新增';
    }

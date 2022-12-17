@@ -88,3 +88,54 @@ export function getSingnatureUrlsApi(urls) {
     params: { urls: urls }
   })
 }
+
+// 修改会员备注
+export function memberRemarkApi(params) {
+  return request({
+    url: '/member/remark',
+    method: 'post',
+    data: params
+  })
+}
+
+// 修改会员点数
+export function memberPointApi(params) {
+  return request({
+    url: '/member/point',
+    method: 'post',
+    data: params
+  })
+}
+
+// 查询全部ai作画风格
+export function paintingStyleTreeApi() {
+  return request({
+    url: '/aiPaintingStyle',
+    method: 'get'
+  })
+}
+
+// 新增修改ai作画风格
+export function paintingStyleEditApi(params) {
+  return request({
+    url: '/aiPaintingStyle',
+    method: 'post',
+    data: params
+  })
+}
+
+// 删除ai作画风格
+export function paintingStyleDeleteApi(id) {
+  return request({
+    url: '/aiPaintingStyle/' + id,
+    method: 'delete'
+  })
+}
+
+// 获取oss上传签名
+export function getStaticUploadSingnatureApi() {
+  return request({
+    url: '/ali/getStaticUploadSingnature',
+    method: 'get',
+  });
+}
