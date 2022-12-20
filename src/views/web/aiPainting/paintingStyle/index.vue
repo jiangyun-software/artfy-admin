@@ -68,10 +68,10 @@
             </div>
          </el-form-item>
          <el-form-item v-show="formData.parent.id" label="描述词" prop="keyword">
-            <el-input v-model="formData.keyword" placeholder="请输入描述词" />
+            <el-input type="textarea" :rows="3" v-model="formData.keyword" placeholder="请输入描述词" />
          </el-form-item>
          <el-form-item v-show="formData.parent.id" label="反向描述词" prop="reverseKeyword">
-            <el-input v-model="formData.reverseKeyword" placeholder="请输入反向描述词" />
+            <el-input type="textarea" :rows="2" v-model="formData.reverseKeyword" placeholder="请输入反向描述词" />
          </el-form-item>
          <el-form-item v-show="formData.parent.id" label="模型" prop="model">
             <el-select v-model="formData.model" placeholder="请选择模型">
@@ -85,9 +85,6 @@
          </el-form-item>
          <el-form-item v-show="formData.parent.id" label="步数" prop="step">
             <el-input-number v-model.number="formData.step" placeholder="步数" :min="0" :max="100" />
-         </el-form-item>
-         <el-form-item v-show="formData.parent.id" label="guidanceScale" prop="guidanceScale">
-            <el-input-number v-model.number="formData.guidanceScale" placeholder="guidanceScale" :min="0" :max="100" />
          </el-form-item>
          <el-form-item label="状态" prop="disabled">
             <el-radio-group v-model="formData.disabled" class="ml-4">
@@ -129,7 +126,6 @@ const formData = reactive({
    model: '0',
    sampler: 'Euler',
    step: 50,
-   guidanceScale: 30,
 });
 
 
@@ -164,7 +160,6 @@ const handleEdit = (row) => {
       formData.model = row.model;
       formData.sampler = row.sampler;
       formData.step = row.step;
-      formData.guidanceScale = row.guidanceScale;
    } else {
       editTitle.value = '新增';
    }
