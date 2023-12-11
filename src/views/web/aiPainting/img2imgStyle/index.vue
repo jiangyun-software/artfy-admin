@@ -37,23 +37,13 @@
          <el-form-item label="id" prop="id" style="display: none;">
             <el-input v-model="formData.id" placeholder="id" />
          </el-form-item>
-         <el-form-item v-show="!(formData.id && !formData.parent.id)" label="风格分组" prop="parent.id">
-            <el-select v-model="formData.parent.id" clearable placeholder="请选择风格分组">
-               <el-option
-                  v-for="item in tree"
-                  :key="item.id"
-                  :label="item.label"
-                  :value="item.id"
-               />
-            </el-select>
-         </el-form-item>
          <el-form-item label="风格名称" prop="label">
             <el-input v-model="formData.label" placeholder="请输入风格名称" />
          </el-form-item>
          <el-form-item label="排序" prop="seq">
             <el-input-number v-model.number="formData.seq" placeholder="排序" />
          </el-form-item>
-         <el-form-item v-show="formData.parent.id" label="图片" prop="image" style="font-weight: 700">
+         <el-form-item label="图片" prop="image" style="font-weight: 700">
             <div style="width: 96px;height: 96px;border-radius: 4px;overflow: hidden;border: 1px solid grey;position: relative;">
                <div v-show="!formData.image" style="width: 100%; height: 100%;text-align: center;padding-top: 20px;">
                   <el-icon><Plus /></el-icon>
@@ -105,12 +95,12 @@ const formData = reactive({
    parent: {
       id: undefined
    },
+   seq: 0,
    label: '',
    image: '',
    disabled: false,
    remark: '',
-   seq: 0,
-   type: '0',
+   type: '1',
    source: '0',
    jsonParams: '',
    jsonParamsObj: {},
@@ -119,12 +109,14 @@ const formData = reactive({
 
 const model = ref<any>({});
 
+const sampler = ['Euler a', 'Euler', 'LMS', 'Heun', 'DPM2', 'DPM2 a', 'DPM++ 2S a', 'DPM++ 2M', 'DPM++ SDE', 'DPM fast', 'DPM adaptive', 'LMS Karras', 'DPM2 Karras', 'DPM2 a Karras', 'DPM++2S a Karras', 'DPM++2M Karras', 'DPM++ SDE Karras', 'DDIM', 'PLMS'];
+
 const loading = ref(false);
 
 const tree = ref<any>([]);
 
 const getTree = () => {
-   paintingStyleTreeApi('0').then((res) => {
+   paintingStyleTreeApi('1').then((res) => {
       if (res.code == 200) {
          tree.value = res.data;
       }
@@ -135,6 +127,7 @@ const handleEdit = async (row) => {
    editDialogVisible.value = true;
    await nextTick();
    editFormRef.value.resetFields();
+   formData.jsonParamsObj = {};
    if (row) {
       editTitle.value = '修改';
       formData.id = row.id;
@@ -251,6 +244,9 @@ getModelList();
 
 getTree();
 </script>
-<style lang="scss">
 
+<style lang="scss" scoped>
+:deep(.jsoneditor-poweredBy) {
+   display: none;
+}
 </style>

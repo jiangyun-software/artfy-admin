@@ -47,6 +47,14 @@
             </template>
          </el-table-column>
       </el-table>
+
+      <pagination
+         v-show="total > 0"
+         :total="total"
+         v-model:page="queryFormData.pageNum"
+         v-model:limit="queryFormData.pageSize"
+         @pagination="handleQuery"
+      />
    </el-row>
 
   <el-dialog :title="editTitle" v-model="editDialogVisible" width="600px" append-to-body :close-on-click-modal="false">

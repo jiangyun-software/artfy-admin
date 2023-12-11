@@ -21,12 +21,14 @@
          <el-table-column label="会员id" prop="member.id" />
          <el-table-column label="会员手机号" prop="member.phonenumber" />
          <el-table-column label="会员备注" prop="member.remark" />
-         <el-table-column label="产品" prop="product" />
+         <el-table-column label="产品" prop="product.name" />
          <el-table-column label="调用时间" prop="requestTime" />
          <el-table-column label="输入对象">
             <template #default="scope">
                <!-- <el-button type="primary" size="small" link @click="previewImage(scope.row.inputObjects)">点击查看</el-button> -->
+               <span v-if="textInputProducts.indexOf(scope.row.product.key) != -1">{{ scope.row.inputObjects }}</span>
                <el-image
+                  v-else
                   style="width: 50px; height: 50px"
                   :src="scope.row.inputObjects.split(',')[0]"
                   :preview-src-list="scope.row.inputObjects.split(',')"
@@ -38,7 +40,9 @@
          <el-table-column label="输出对象">
             <template #default="scope">
                <!-- <el-button type="primary" size="small" link @click="previewImage(scope.row.outputObjects)">点击查看</el-button> -->
+               <span v-if="scope.row.product.key == 'videoTranslate'"><el-button type="primary" size="small" text @click="viewVideo(scope.row.inputObjects[0])">点击查看</el-button></span>
                <el-image
+                  v-else
                   style="width: 50px; height: 50px"
                   :src="scope.row.outputObjects.split(',')[0]"
                   :preview-src-list="scope.row.outputObjects.split(',')"
@@ -64,6 +68,9 @@
 
       <el-image-viewer v-if="viewImage" :url-list="previewSrc" :teleported="true" @close="viewImage = false" />
 
+      <el-dialog v-model="videoDialogVisible">
+         <video :src="videoUrl"></video>
+      </el-dialog>
    </div>
 </template>
 
@@ -114,6 +121,18 @@ const previewImage = (objects) => {
       }
    });
 }
+
+const videoDialogVisible = false;
+const videoUrl = '';
+const viewVideo = (url) => {
+   videoUrl = url;
+   videoDialogVisible = true;
+}
+
+const textInputProducts = [
+   'aiPainting',
+   'videoTranslate'
+]
 
 getList();
 </script>

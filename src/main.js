@@ -42,6 +42,8 @@ import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
 
+import 'jsoneditor';
+
 const app = createApp(App)
 
 // 全局方法挂载

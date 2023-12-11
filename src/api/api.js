@@ -108,9 +108,9 @@ export function memberPointApi(params) {
 }
 
 // 查询全部ai作画风格
-export function paintingStyleTreeApi() {
+export function paintingStyleTreeApi(type) {
   return request({
-    url: '/aiPaintingStyle',
+    url: '/aiPaintingStyle/' + type,
     method: 'get'
   })
 }
@@ -136,6 +136,23 @@ export function paintingStyleDeleteApi(id) {
 export function getStaticUploadSingnatureApi() {
   return request({
     url: '/ali/getStaticUploadSingnature',
+    method: 'get',
+  });
+}
+
+// 照片打印订单列表
+export function photoOrderListApi(params) {
+  return request({
+    url: '/photoOrder',
+    method: 'get',
+    params: params,
+  });
+}
+
+// 照片打印订单列表
+export function photoOrderRefundApi(id) {
+  return request({
+    url: '/photoOrder/refund/' + id,
     method: 'get',
   });
 }
