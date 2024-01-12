@@ -16,6 +16,12 @@
                <img v-if="scope.row.image" :src="scope.row.image" alt="" style="width: 50px; height: 50px;">
             </template>
          </el-table-column>
+         <el-table-column label="人脸融合" align="center" class-name="small-padding fixed-width" >
+            <template #default="scope">
+               <el-tag type="success" v-if="scope.row.faceSwap">启用</el-tag>
+               <el-tag type="danger" v-else>禁用</el-tag>
+            </template>
+         </el-table-column>
          <el-table-column label="状态" align="center" class-name="small-padding fixed-width" >
             <template #default="scope">
                <el-tag type="danger" v-if="scope.row.disabled">禁用</el-tag>
@@ -43,7 +49,7 @@
          <el-form-item label="排序" prop="seq">
             <el-input-number v-model.number="formData.seq" placeholder="排序" />
          </el-form-item>
-         <el-form-item label="图片" prop="image" style="font-weight: 700">
+         <el-form-item label="封面" prop="image" style="font-weight: 700">
             <div style="width: 96px;height: 96px;border-radius: 4px;overflow: hidden;border: 1px solid grey;position: relative;">
                <div v-show="!formData.image" style="width: 100%; height: 100%;text-align: center;padding-top: 20px;">
                   <el-icon><Plus /></el-icon>
@@ -52,6 +58,28 @@
                <div v-show="formData.image" style="width: 100%; height: 100%;"><img :src="formData.image" alt="" style="width: 100%; height: 100%;" /></div>
                <input type="file" style="position: absolute; font-size: 0px; top: 0px; left: 0px; width: 100%;height: 100%; opacity: 0;cursor: pointer;" @change="uploadFile($event)" />
             </div>
+         </el-form-item>
+         <el-form-item label="示例图" prop="example">
+            <div v-for="(item, index) in formData.exampleList" :key="index" class="example">
+               <div class="example-origin"><img v-if="item.origin" :src="item.origin" alt=""><el-icon v-else :size="32"><UploadFilled /></el-icon><div v-if="!item.origin">上传原图</div><input type="file" @change="uploadExample($event, index, 'origin')" /></div>
+               <div class="example-target"><img v-if="item.target" :src="item.target" alt=""><el-icon v-else :size="32"><UploadFilled /></el-icon><div v-if="!item.target">上传效果图</div><input type="file" @change="uploadExample($event, index, 'target')" /></div>
+               <div class="example-change"><el-icon :size="24" @click="addExample(index)"><CirclePlus v-if="index == 0" /><Remove v-else /></el-icon></div>
+            </div>
+         </el-form-item>
+         <el-form-item label="标签" prop="tags">
+            <el-select style="width: 100%;"
+               ref="headerSearchSelectRef"
+               v-model="formData.tagsArry"
+               default-first-option
+               multiple
+            >
+               <el-option-group v-for="group in tagTree.filter(item => !item.alone)" :key="group.id" :label="group.name">
+                  <el-option v-for="tag in group.children" :key="tag.id" :value="tag.name" :label="tag.name" />
+               </el-option-group>
+               <el-option-group label="独立标签">
+                  <el-option v-for="group in tagTree.filter(item => item.alone)" :key="group.id" :label="group.name" :value="group.name"/>
+               </el-option-group>
+            </el-select>
          </el-form-item>
          <el-form-item label="来源" prop="source">
             <el-radio-group v-model="formData.source">
@@ -67,6 +95,13 @@
                <el-radio :label="false">启用</el-radio>
                <el-radio :label="true">禁用</el-radio>
             </el-radio-group>
+         </el-form-item>
+         <el-form-item label="人脸融合" prop="faceSwap">
+            <el-switch class="ml-4"
+                  v-model="formData.faceSwap"
+                  :active-value="true"
+                  :inactive-value="false"
+               ></el-switch>
          </el-form-item>
          <el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" placeholder="备注" type="textarea" />
@@ -84,7 +119,8 @@
 
 <script setup name="PaintingStyle" lang="ts">
 import { reactive, ref, nextTick } from 'vue';
-import { paintingStyleTreeApi, paintingStyleEditApi, paintingStyleDeleteApi, getStaticUploadSingnatureApi } from '@/api/api.js';
+import { paintingStyleTreeApi, paintingStyleEditApi, paintingStyleDeleteApi, getStaticUploadSingnatureApi, styleTagTreeApi } from '@/api/api.js';
+import { getDicts } from '@/api/system/dict/data.js';
 import { ElMessage } from 'element-plus'
 import axios from 'axios';
 import { listData } from "@/api/system/dict/data";
@@ -99,11 +135,16 @@ const formData = reactive({
    label: '',
    image: '',
    disabled: false,
+   faceSwap: false,
    remark: '',
    type: '1',
    source: '0',
    jsonParams: '',
    jsonParamsObj: {},
+   tags: '',
+   tagsArry: [],
+   example: '',
+   exampleList: []
 });
 
 
@@ -135,10 +176,13 @@ const handleEdit = async (row) => {
       formData.label = row.label;
       formData.image = row.image;
       formData.disabled = row.disabled;
+      formData.faceSwap = row.faceSwap;
       formData.remark = row.remark;
       formData.source = row.source;
       formData.seq = row.seq;
       formData.jsonParamsObj = (row.jsonParams == ''?{}:JSON.parse(row.jsonParams));
+      formData.tagsArry = row.tags == ''? [] : row.tags.split(',');
+      formData.exampleList = JSON.parse(row.example || '[{"origin": "", "target": ""}]');
    } else {
       editTitle.value = '新增';
    }
@@ -151,7 +195,10 @@ const editFormRef = ref();
 const submitForm = () => {
    editFormRef.value.validate((pass) => {
       if (pass) {
+
          formData.jsonParams = JSON.stringify(formData.jsonParamsObj);
+         formData.tags = formData.tagsArry.join(',');
+         formData.example = JSON.stringify(formData.exampleList);
          paintingStyleEditApi(formData).then((res) => {
             if (res.code == 200) {
                loading.value = false;
@@ -169,11 +216,19 @@ const cancel = () => {
 }
 
 const validateImage = (rule: any, value: any, callback: any) => {
-  if (formData.parent.id && !formData.image) {
-    callback(new Error('请上传图片'))
-  } else {
-    callback()
-  }
+   if (formData.parent.id && !formData.image) {
+      callback(new Error('请上传图片'))
+   } else {
+      callback()
+   }
+}
+
+const validateExample = (rule: any, value: any, callback: any) => {
+   if (formData.exampleList.filter(item => !item.origin || !item.target).length > 0) {
+      callback(new Error('请上传示例图'))
+   } else {
+      callback()
+   }
 }
 
 const jsonEditorValidateRes = ref([]);
@@ -194,6 +249,7 @@ const rules = reactive({
    image: [{ validator: validateImage, trigger: 'blur' }],
    disabled: [{ required: true, message: '请选择状态', trigger: 'blur' }],
    jsonParams: [{ validator: validateJsonParam, trigger: 'blur' }],
+   example: [{ validator: validateExample, trigger: 'blur' }],
 });
 
 const handleDelete = (id) => {
@@ -240,6 +296,45 @@ const getModelList = () => {
    });
 }
 
+const tagTree = ref<any>([]);
+
+styleTagTreeApi().then(res => {
+   tagTree.value = res.data;
+})
+
+const addExample = (index) => {
+   if (index == 0 && formData.exampleList.length < 3) {
+      formData.exampleList.push({"origin": "", "target": ""});
+   } else if (index > 0) {
+      formData.exampleList.splice(index, 1);
+   }
+}
+
+const uploadExample = (e, index, type) => {
+   if (e.target.files.length == 0) {
+      return false;
+   }
+   getStaticUploadSingnatureApi().then((res) => {
+      const params = new FormData();
+      params.append('key', res.data.key);
+      params.append('policy', res.data.policy);
+      params.append('OSSAccessKeyId', res.data.OSSAccessKeyId);
+      params.append('success_action_status', '200');
+      params.append('signature', res.data.signature);
+      params.append('file', e.target.files[0]);
+      axios({
+         url: res.data.host,
+         method: 'post',
+         data: params,
+         headers: { 'Content-Type': 'multipart/form-data;charset=UTF-8' },
+         onUploadProgress: function (progress) {
+         },
+      }).then(() => {
+         formData.exampleList[index][type] = res.data.url;
+      });
+   });
+}
+
 getModelList();
 
 getTree();
@@ -248,5 +343,53 @@ getTree();
 <style lang="scss" scoped>
 :deep(.jsoneditor-poweredBy) {
    display: none;
+}
+
+.example {
+   display: flex;
+   width: 100%;
+   gap: 16px;
+   margin: 6px 0px;
+   .example-origin {
+      position: relative;
+      height: 72px;
+      width: 72px;
+      border: solid 1px black;
+   }
+   .example-target {
+      position: relative;
+      height: 72px;
+      width: 72px;
+      border: solid 1px black;
+   }
+
+   .example-origin, .example-target, .example-change {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 12px;
+      line-height: 12px;
+   }
+
+   .example-change {
+      cursor: pointer;
+   }
+
+   input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      font-size: 0;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+   }
+
+   img {
+      width: 100%;
+      height: 100%;
+   }
 }
 </style>

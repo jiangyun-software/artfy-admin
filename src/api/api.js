@@ -156,3 +156,54 @@ export function photoOrderRefundApi(id) {
     method: 'get',
   });
 }
+
+// 查询轮播图
+export function swiperListApi(params) {
+  return request({
+    url: '/swiper',
+    method: 'get',
+    params: params,
+  })
+}
+
+// 新增/修改轮播图
+export function swiperEditApi(data) {
+  return request({
+    url: '/swiper',
+    method: 'post',
+    data: data,
+  })
+}
+
+// 删除轮播图
+export function swiperDeleteApi(id) {
+  return request({
+    url: '/swiper/' + id,
+    method: 'delete',
+  })
+}
+
+// 查询风格标签
+export function styleTagTreeApi() {
+  return request({
+    url: '/styleTag',
+    method: 'get',
+  })
+}
+
+// 新增修改风格标签
+export function styleTagEditApi(styleTag) {
+  return request({
+    url: '/styleTag',
+    method: 'post',
+    data: styleTag
+  })
+}
+
+// 删除风格标签
+export function styleTagDeleteApi(id) {
+  return request({
+    url: '/styleTag/' + id,
+    method: 'delete',
+  })
+}
