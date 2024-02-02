@@ -30,7 +30,7 @@
             <el-input v-model="formData.name" placeholder="" />
          </el-form-item>
          <el-form-item label="一级标签" prop="parentId">
-            <el-select v-model="formData.parentId" style="width: 100%;">
+            <el-select clearable v-model="formData.parentId" style="width: 100%;">
                <el-option v-for="parent in tagTree.filter(item => !item.alone)" :key="parent.id" :value="parent.id" :label="parent.name" />
             </el-select>
          </el-form-item>
@@ -39,6 +39,12 @@
          </el-form-item>
          <el-form-item label="独立标签" prop="alone" v-show="!formData.parentId">
             <el-radio-group v-model="formData.alone">
+               <el-radio :label="false">否</el-radio>
+               <el-radio :label="true">是</el-radio>
+            </el-radio-group>
+         </el-form-item>
+         <el-form-item label="首页展示" prop="showHome" v-show="formData.parentId">
+            <el-radio-group v-model="formData.showHome">
                <el-radio :label="false">否</el-radio>
                <el-radio :label="true">是</el-radio>
             </el-radio-group>
@@ -57,14 +63,15 @@
 <script setup name="StyleTag" lang="ts">
 import { reactive, ref, nextTick } from 'vue';
 import { styleTagTreeApi, styleTagEditApi, styleTagDeleteApi } from '@/api/api.js';
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const formData = reactive({
    id: undefined,
    parentId: null,
    name: '',
    seq: 0,
-   alone: false
+   alone: false,
+   showHome: true
 });
 
 
@@ -93,6 +100,7 @@ const handleEdit = async (row) => {
       formData.name = row.name;
       formData.seq = row.seq;
       formData.alone = row.alone;
+      formData.showHome = row.showHome;
    } else {
       editTitle.value = '新增';
    }
@@ -126,11 +134,13 @@ const rules = reactive({
 })
 
 const handleDelete = (id) => {
-   styleTagDeleteApi(id).then((res) => {
+   ElMessageBox.confirm('是否确认删除？').then(() => {
+      styleTagDeleteApi(id).then((res) => {
       if (res.code == 200) {
          ElMessage.success('删除成功');
          getTree();
       }
+   });
    });
 }
 
